@@ -14,6 +14,8 @@ main(int argc, char *argv[])
     char *newargv[MAXARGS];
     struct rusage ru;
 
+    ru.cputime = 0;
+
     if(argc < 2) {
         printf("Usage: time <comm> [args...]\n");
         exit(-1);

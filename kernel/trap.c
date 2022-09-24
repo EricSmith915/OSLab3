@@ -78,8 +78,8 @@ usertrap(void)
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2){
-    yield();
     p->cputime = p->cputime + 1;
+    yield();
   }
 
   usertrapret();
@@ -139,8 +139,6 @@ kerneltrap()
   uint64 sepc = r_sepc();
   uint64 sstatus = r_sstatus();
   uint64 scause = r_scause();
-
-  struct proc *p = myproc();
   
   if((sstatus & SSTATUS_SPP) == 0)
     panic("kerneltrap: not from supervisor mode");
@@ -155,8 +153,8 @@ kerneltrap()
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING){
+    myproc()->cputime++;
     yield();
-    p->cputime = p->cputime + 1;
   }
 
   // the yield() may have caused some traps to occur,

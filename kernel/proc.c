@@ -709,11 +709,11 @@ wait2(uint64 addr, uint64 raddr)
 
         havekids = 1;
         if(np->state == ZOMBIE){
+          use.cputime = np->cputime;
+          copyout(p->pagetable, raddr, (char *)&use.cputime, sizeof(use.cputime));
           // Found one.
           pid = np->pid;
-          use.cputime = np->cputime;
-          if(copyout(p->pagetable, addr, (char *)&np->xstate, sizeof(np->xstate)) < 0 &&
-            copyout(p->pagetable, raddr, (char *)&use, sizeof(use)) < 0) {
+          if(copyout(p->pagetable, addr, (char *)&np->xstate, sizeof(np->xstate)) < 0) {
             release(&np->lock);
             release(&wait_lock);
             return -1;
