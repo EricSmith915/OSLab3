@@ -8,6 +8,7 @@
 
 struct spinlock tickslock;
 uint ticks;
+uint tempsticks;
 
 extern char trampoline[], uservec[], userret[];
 
@@ -77,8 +78,44 @@ usertrap(void)
     exit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2){
-    p->cputime = p->cputime + 1;
+  //Lowers priority if it is
+  if(which_dev == 2 && --(p->tsticks) <= 0){
+
+    //Updates CPUTime field
+    if(p->priority == LOW){
+      p->cputime = p->cputime + TSTICKSLOW;
+      tempsticks = TSTICKSLOW;
+      p->tsticks = TSTICKSLOW;
+    } else if (p->priority == MEDIUM){
+      p->cputime = p->cputime + TSTICKSMEDIUM;
+      tempsticks = TSTICKSMEDIUM;
+      p->tsticks = TSTICKSMEDIUM;
+    } else if (p->priority == HIGH){
+      p->cputime = p->cputime + TSTICKSHIGH;
+      tempsticks = TSTICKSHIGH;
+      p->tsticks = TSTICKSHIGH;
+    }
+
+    //p->cputime = p->cputime + 1;
+
+    if(p->priority > LOW) {
+
+      p->priority = p->priority - 1;
+
+      if(p->priority == MEDIUM){
+        p->timeslice = TSTICKSMEDIUM;
+        p->tsticks = TSTICKSMEDIUM;
+        tempsticks = TSTICKSMEDIUM;
+      }
+
+      if(p->priority == LOW){
+        p->timeslice = TSTICKSLOW;
+        p->tsticks = TSTICKSLOW;
+        tempsticks = TSTICKSLOW;
+      }
+
+    }
+
     yield();
   }
 
@@ -152,11 +189,50 @@ kerneltrap()
   }
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING){
-    myproc()->cputime++;
+  //Lowers priority if possible
+  if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING && --(myproc()->tsticks) <= 0){
+   
+    //Updates CPUTime field
+    if(myproc()->priority == LOW){
+      myproc()->cputime = myproc()->cputime + TSTICKSLOW;
+      myproc()->tsticks = TSTICKSLOW;
+      tempsticks = TSTICKSLOW;
+    } else if (myproc()->priority == MEDIUM){
+      myproc()->cputime = myproc()->cputime + TSTICKSMEDIUM;
+      tempsticks = TSTICKSMEDIUM;
+      myproc()->tsticks = TSTICKSMEDIUM;
+    } else if (myproc()->priority == HIGH){
+      myproc()->cputime = myproc()->cputime + TSTICKSHIGH;
+      tempsticks = TSTICKSLOW;
+      myproc()->tsticks = HIGH;
+    }
+
+    tempsticks = myproc()->tsticks;
+
+    //Checks if the priority can be lowered
+    if(myproc()->priority > LOW){
+      
+      //Lowers Priority
+      myproc()->priority--;
+
+      //Changes tstick value if necessary
+      if(myproc()->priority == MEDIUM){
+        myproc()->timeslice = TSTICKSMEDIUM;
+        myproc()->tsticks = TSTICKSMEDIUM;
+        tempsticks = TSTICKSMEDIUM;
+      }
+
+      //Changes tstick value if necessary
+      if(myproc()->priority == LOW){
+        myproc()->timeslice = TSTICKSLOW;
+        myproc()->tsticks = TSTICKSLOW;
+        tempsticks = TSTICKSLOW;
+      }
+
+    }
+    
     yield();
   }
-
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
   w_sepc(sepc);
