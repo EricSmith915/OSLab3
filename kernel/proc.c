@@ -767,6 +767,7 @@ kill(int pid)
       if(p->state == SLEEPING){
         // Wake process from sleep().
         p->state = RUNNABLE;
+        enqueue_at_tail(p, p->priority);
       }
       release(&p->lock);
       return 0;
