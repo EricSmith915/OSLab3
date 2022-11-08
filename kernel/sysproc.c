@@ -7,6 +7,7 @@
 #include "spinlock.h"
 #include "proc.h"
 
+
 uint64
 sys_exit(void)
 {
@@ -116,4 +117,10 @@ sys_wait2(void)
   if(argaddr(0, &p1) < 0 || argaddr(1, &p2) < 0)  
     return -1;
   return(wait2(p1, p2));
+}
+
+uint64
+sys_freepmem()
+{
+  return kfreepagecount();
 }

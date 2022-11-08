@@ -63,6 +63,7 @@ void            ramdiskrw(struct buf*);
 void*           kalloc(void);
 void            kfree(void *);
 void            kinit(void);
+uint64          kfreepagecount(void);
 
 // log.c
 void            initlog(int, struct superblock*);
@@ -106,6 +107,10 @@ int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void            procdump(void);
 int             procinfo(uint64);
 int             wait2(uint64 p1, uint64 p2);
+struct mmr_list* get_mmr_list(int);
+int             alloc_mmr_listid(void);
+void            dealloc_mmr_listid(int);
+void            mmrlistinit(void); 
 
 // swtch.S
 void            swtch(struct context*, struct context*);
@@ -172,6 +177,8 @@ uint64          walkaddr(pagetable_t, uint64);
 int             copyout(pagetable_t, uint64, char *, uint64);
 int             copyin(pagetable_t, char *, uint64, uint64);
 int             copyinstr(pagetable_t, char *, uint64, uint64);
+int             mapvpages(pagetable_t, uint64, uint64);
+//int             uvmcopyshared(pagetable_t, pagetable_t, uint64, uint64);
 
 // plic.c
 void            plicinit(void);

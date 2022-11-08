@@ -27,6 +27,9 @@ int sleep(int);
 int uptime(void);
 int getprocs(struct pstat*);
 int wait2(int*, struct rusage*);
+int freepmem(void);
+int *mmap(void*, uint64, int, int, int, int);
+int munmap(void *, int);
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -80,3 +80,22 @@ kalloc(void)
     memset((char*)r, 5, PGSIZE); // fill with junk
   return (void*)r;
 }
+
+//Added for lab 3
+//Acquires kmem lock and then counts how many free pages there are
+uint64 kfreepagecount(void) 
+{
+  int count = 0;
+  struct run *r;
+  acquire(&kmem.lock);
+  r = kmem.freelist;
+
+  //Traverses the free list and adds to count if page is free
+  while(r){
+    count++;
+    r = r->next;
+  }
+  release(&kmem.lock);
+  return count;
+
+}

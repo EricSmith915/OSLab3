@@ -9,6 +9,7 @@
 struct spinlock tickslock;
 uint ticks;
 uint tempsticks;
+int sched_policy_trap = RR;
 
 extern char trampoline[], uservec[], userret[];
 
@@ -68,6 +69,27 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+  } else if(r_scause() == 13 || r_scause() == 15) {
+
+    uint64 faultAddress = r_stval();
+
+    for(int i = 0; i < MAX_MMR; i++){
+      if(faultAddress >= p->mmr[i].addr && faultAddress < (p->mmr[i].addr + p->mmr[i].length) && p->mmr[i].valid){
+        if(r_scause() == 13 && (p->mmr[i].prot & PTE_R)){
+          //Read permission allowed
+        }
+        if(r_scause() == 15 && (p->mmr[i].prot & PTE_W)) {
+          //Write permission allowed
+          uint64 physAddress = (uint64)kalloc();
+          uint64 start_addr = PGROUNDDOWN(faultAddress);
+
+        
+          mappages(p->pagetable, start_addr, PGSIZE, physAddress,p->mmr[i].prot | PTE_U);
+        }
+      }
+    }
+
+    
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
@@ -79,46 +101,50 @@ usertrap(void)
 
   // give up the CPU if this is a timer interrupt.
   //Lowers priority if it is
-  if(which_dev == 2 && --(p->tsticks) <= 0){
+  if(which_dev == 2){
+    if(sched_policy_trap == MLFQ && --(p->tsticks) <= 0){
 
-    //Updates CPUTime field
-    if(p->priority == LOW){
-      p->cputime = p->cputime + TSTICKSLOW;
-      tempsticks = TSTICKSLOW;
-      p->tsticks = TSTICKSLOW;
-    } else if (p->priority == MEDIUM){
-      p->cputime = p->cputime + TSTICKSMEDIUM;
-      tempsticks = TSTICKSMEDIUM;
-      p->tsticks = TSTICKSMEDIUM;
-    } else if (p->priority == HIGH){
-      p->cputime = p->cputime + TSTICKSHIGH;
-      tempsticks = TSTICKSHIGH;
-      p->tsticks = TSTICKSHIGH;
-    }
-
-    //p->cputime = p->cputime + 1;
-
-    if(p->priority > LOW) {
-
-      p->priority = p->priority - 1;
-
-      if(p->priority == MEDIUM){
-        p->timeslice = TSTICKSMEDIUM;
-        p->tsticks = TSTICKSMEDIUM;
-        tempsticks = TSTICKSMEDIUM;
-      }
-
+      //Updates CPUTime field
       if(p->priority == LOW){
-        p->timeslice = TSTICKSLOW;
-        p->tsticks = TSTICKSLOW;
+        p->cputime = p->cputime + TSTICKSLOW;
         tempsticks = TSTICKSLOW;
+        p->tsticks = TSTICKSLOW;
+      } else if (p->priority == MEDIUM){
+        p->cputime = p->cputime + TSTICKSMEDIUM;
+        tempsticks = TSTICKSMEDIUM;
+        p->tsticks = TSTICKSMEDIUM;
+      } else if (p->priority == HIGH){
+        p->cputime = p->cputime + TSTICKSHIGH;
+        tempsticks = TSTICKSHIGH;
+        p->tsticks = TSTICKSHIGH;
       }
 
+      //p->cputime = p->cputime + 1;
+
+      if(p->priority > LOW) {
+
+        p->priority = p->priority - 1;
+
+        if(p->priority == MEDIUM){
+          p->timeslice = TSTICKSMEDIUM;
+          p->tsticks = TSTICKSMEDIUM;
+          tempsticks = TSTICKSMEDIUM;
+        }
+
+        if(p->priority == LOW){
+          p->timeslice = TSTICKSLOW;
+          p->tsticks = TSTICKSLOW;
+          tempsticks = TSTICKSLOW;
+        }
+
+      }
     }
 
+    if(sched_policy_trap == RR){
+      p->cputime++;
+    }
     yield();
   }
-
   usertrapret();
 }
 
@@ -190,47 +216,52 @@ kerneltrap()
 
   // give up the CPU if this is a timer interrupt.
   //Lowers priority if possible
-  if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING && --(myproc()->tsticks) <= 0){
+  if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING){
    
-    //Updates CPUTime field
-    if(myproc()->priority == LOW){
-      myproc()->cputime = myproc()->cputime + TSTICKSLOW;
-      myproc()->tsticks = TSTICKSLOW;
-      tempsticks = TSTICKSLOW;
-    } else if (myproc()->priority == MEDIUM){
-      myproc()->cputime = myproc()->cputime + TSTICKSMEDIUM;
-      tempsticks = TSTICKSMEDIUM;
-      myproc()->tsticks = TSTICKSMEDIUM;
-    } else if (myproc()->priority == HIGH){
-      myproc()->cputime = myproc()->cputime + TSTICKSHIGH;
-      tempsticks = TSTICKSLOW;
-      myproc()->tsticks = HIGH;
-    }
-
-    tempsticks = myproc()->tsticks;
-
-    //Checks if the priority can be lowered
-    if(myproc()->priority > LOW){
-      
-      //Lowers Priority
-      myproc()->priority--;
-
-      //Changes tstick value if necessary
-      if(myproc()->priority == MEDIUM){
-        myproc()->timeslice = TSTICKSMEDIUM;
-        myproc()->tsticks = TSTICKSMEDIUM;
-        tempsticks = TSTICKSMEDIUM;
-      }
-
-      //Changes tstick value if necessary
+    if(sched_policy_trap == MLFQ && --(myproc()->tsticks) <= 0){
+      //Updates CPUTime field
       if(myproc()->priority == LOW){
-        myproc()->timeslice = TSTICKSLOW;
+        myproc()->cputime = myproc()->cputime + TSTICKSLOW;
         myproc()->tsticks = TSTICKSLOW;
         tempsticks = TSTICKSLOW;
+      } else if (myproc()->priority == MEDIUM){
+        myproc()->cputime = myproc()->cputime + TSTICKSMEDIUM;
+        tempsticks = TSTICKSMEDIUM;
+        myproc()->tsticks = TSTICKSMEDIUM;
+      } else if (myproc()->priority == HIGH){
+        myproc()->cputime = myproc()->cputime + TSTICKSHIGH;
+        tempsticks = TSTICKSLOW;
+        myproc()->tsticks = HIGH;
       }
 
+      tempsticks = myproc()->tsticks;
+
+      //Checks if the priority can be lowered
+      if(myproc()->priority > LOW){
+        
+        //Lowers Priority
+        myproc()->priority--;
+
+        //Changes tstick value if necessary
+        if(myproc()->priority == MEDIUM){
+          myproc()->timeslice = TSTICKSMEDIUM;
+          myproc()->tsticks = TSTICKSMEDIUM;
+          tempsticks = TSTICKSMEDIUM;
+        }
+
+        //Changes tstick value if necessary
+        if(myproc()->priority == LOW){
+          myproc()->timeslice = TSTICKSLOW;
+          myproc()->tsticks = TSTICKSLOW;
+          tempsticks = TSTICKSLOW;
+        }
+
+      }
     }
-    
+
+    if(sched_policy_trap == RR){
+      myproc()->cputime++;
+    }
     yield();
   }
   // the yield() may have caused some traps to occur,
@@ -293,6 +324,10 @@ devintr()
     w_sip(r_sip() & ~2);
 
     return 2;
+  // } else if (scause == 13 || scause == 15){
+  //   printf("page trap!");
+  //   return 4;
+  //Catch page trap
   } else {
     return 0;
   }

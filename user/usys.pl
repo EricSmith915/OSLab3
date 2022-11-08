@@ -38,3 +38,6 @@ entry("sleep");
 entry("uptime");
 entry("getprocs");
 entry("wait2");
+entry("freepmem");
+entry("mmap");
+entry('munmap')
