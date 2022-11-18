@@ -76,7 +76,11 @@ usertrap(void)
     for(int i = 0; i < MAX_MMR; i++){
       if(faultAddress >= p->mmr[i].addr && faultAddress < (p->mmr[i].addr + p->mmr[i].length) && p->mmr[i].valid){
         if(r_scause() == 13 && (p->mmr[i].prot & PTE_R)){
-          //Read permission allowed
+          uint64 physAddress = (uint64)kalloc();
+          uint64 start_addr = PGROUNDDOWN(faultAddress);
+
+        
+          mappages(p->pagetable, start_addr, PGSIZE, physAddress,p->mmr[i].prot | PTE_U);
         }
         if(r_scause() == 15 && (p->mmr[i].prot & PTE_W)) {
           //Write permission allowed
