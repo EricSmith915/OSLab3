@@ -24,6 +24,9 @@
 #define RR              0
 
 //Added for lab3
+#define NSEM    100 //Maximum open semaphores per system
+
+//Added for lab3
 #define MAX_MMR 10 // maximum number of memory-mapped regions per process
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };

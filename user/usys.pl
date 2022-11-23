@@ -40,4 +40,8 @@ entry("getprocs");
 entry("wait2");
 entry("freepmem");
 entry("mmap");
-entry('munmap')
+entry('munmap');
+entry('sem_init');
+entry('sem_destroy');
+entry('sem_wait');
+entry('sem_post');
