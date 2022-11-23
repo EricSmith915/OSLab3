@@ -8110,6 +8110,9 @@ sys_sem_init(){
     80003c82:	1141                	addi	sp,sp,-16
     80003c84:	e422                	sd	s0,8(sp)
     80003c86:	0800                	addi	s0,sp,16
+  //uint64 addr;
+
+
   return 1;
 }
     80003c88:	4505                	li	a0,1
@@ -15110,86 +15113,183 @@ seminit(void)
 void
 semdestroy(struct semaphore *s)
 {
-    800073d2:	1141                	addi	sp,sp,-16
-    800073d4:	e422                	sd	s0,8(sp)
-    800073d6:	0800                	addi	s0,sp,16
-    return;
+    800073d2:	1101                	addi	sp,sp,-32
+    800073d4:	ec06                	sd	ra,24(sp)
+    800073d6:	e822                	sd	s0,16(sp)
+    800073d8:	e426                	sd	s1,8(sp)
+    800073da:	1000                	addi	s0,sp,32
+    800073dc:	84aa                	mv	s1,a0
+    acquire(&s->lock);
+    800073de:	ffffa097          	auipc	ra,0xffffa
+    800073e2:	83a080e7          	jalr	-1990(ra) # 80000c18 <acquire>
+    s->count = 0;
+    800073e6:	0004ac23          	sw	zero,24(s1)
+    s->valid = 0;
+    800073ea:	0004ae23          	sw	zero,28(s1)
+    release(&s->lock);
+    800073ee:	8526                	mv	a0,s1
+    800073f0:	ffffa097          	auipc	ra,0xffffa
+    800073f4:	8dc080e7          	jalr	-1828(ra) # 80000ccc <release>
 }
-    800073d8:	6422                	ld	s0,8(sp)
-    800073da:	0141                	addi	sp,sp,16
-    800073dc:	8082                	ret
+    800073f8:	60e2                	ld	ra,24(sp)
+    800073fa:	6442                	ld	s0,16(sp)
+    800073fc:	64a2                	ld	s1,8(sp)
+    800073fe:	6105                	addi	sp,sp,32
+    80007400:	8082                	ret
 
-00000000800073de <semwait>:
+0000000080007402 <semwait>:
 
 void
 semwait(struct semaphore *s)
 {
-    800073de:	1101                	addi	sp,sp,-32
-    800073e0:	ec06                	sd	ra,24(sp)
-    800073e2:	e822                	sd	s0,16(sp)
-    800073e4:	e426                	sd	s1,8(sp)
-    800073e6:	1000                	addi	s0,sp,32
-    800073e8:	84aa                	mv	s1,a0
+    80007402:	1101                	addi	sp,sp,-32
+    80007404:	ec06                	sd	ra,24(sp)
+    80007406:	e822                	sd	s0,16(sp)
+    80007408:	e426                	sd	s1,8(sp)
+    8000740a:	1000                	addi	s0,sp,32
+    8000740c:	84aa                	mv	s1,a0
     acquire(&s->lock);
-    800073ea:	ffffa097          	auipc	ra,0xffffa
-    800073ee:	82e080e7          	jalr	-2002(ra) # 80000c18 <acquire>
+    8000740e:	ffffa097          	auipc	ra,0xffffa
+    80007412:	80a080e7          	jalr	-2038(ra) # 80000c18 <acquire>
     while(s->count == 0){
-    800073f2:	4c9c                	lw	a5,24(s1)
-    800073f4:	eb89                	bnez	a5,80007406 <semwait+0x28>
+    80007416:	4c9c                	lw	a5,24(s1)
+    80007418:	eb89                	bnez	a5,8000742a <semwait+0x28>
         sleep(s, &s->lock);
-    800073f6:	85a6                	mv	a1,s1
-    800073f8:	8526                	mv	a0,s1
-    800073fa:	ffffb097          	auipc	ra,0xffffb
-    800073fe:	e2a080e7          	jalr	-470(ra) # 80002224 <sleep>
+    8000741a:	85a6                	mv	a1,s1
+    8000741c:	8526                	mv	a0,s1
+    8000741e:	ffffb097          	auipc	ra,0xffffb
+    80007422:	e06080e7          	jalr	-506(ra) # 80002224 <sleep>
     while(s->count == 0){
-    80007402:	4c9c                	lw	a5,24(s1)
-    80007404:	dbed                	beqz	a5,800073f6 <semwait+0x18>
+    80007426:	4c9c                	lw	a5,24(s1)
+    80007428:	dbed                	beqz	a5,8000741a <semwait+0x18>
     }
     s->count -= 1;
-    80007406:	37fd                	addiw	a5,a5,-1
-    80007408:	cc9c                	sw	a5,24(s1)
+    8000742a:	37fd                	addiw	a5,a5,-1
+    8000742c:	cc9c                	sw	a5,24(s1)
     release(&s->lock);
-    8000740a:	8526                	mv	a0,s1
-    8000740c:	ffffa097          	auipc	ra,0xffffa
-    80007410:	8c0080e7          	jalr	-1856(ra) # 80000ccc <release>
+    8000742e:	8526                	mv	a0,s1
+    80007430:	ffffa097          	auipc	ra,0xffffa
+    80007434:	89c080e7          	jalr	-1892(ra) # 80000ccc <release>
 }
-    80007414:	60e2                	ld	ra,24(sp)
-    80007416:	6442                	ld	s0,16(sp)
-    80007418:	64a2                	ld	s1,8(sp)
-    8000741a:	6105                	addi	sp,sp,32
-    8000741c:	8082                	ret
+    80007438:	60e2                	ld	ra,24(sp)
+    8000743a:	6442                	ld	s0,16(sp)
+    8000743c:	64a2                	ld	s1,8(sp)
+    8000743e:	6105                	addi	sp,sp,32
+    80007440:	8082                	ret
 
-000000008000741e <sempost>:
+0000000080007442 <sempost>:
 
 void 
 sempost(struct semaphore *s)
 {
-    8000741e:	1101                	addi	sp,sp,-32
-    80007420:	ec06                	sd	ra,24(sp)
-    80007422:	e822                	sd	s0,16(sp)
-    80007424:	e426                	sd	s1,8(sp)
-    80007426:	1000                	addi	s0,sp,32
-    80007428:	84aa                	mv	s1,a0
+    80007442:	1101                	addi	sp,sp,-32
+    80007444:	ec06                	sd	ra,24(sp)
+    80007446:	e822                	sd	s0,16(sp)
+    80007448:	e426                	sd	s1,8(sp)
+    8000744a:	1000                	addi	s0,sp,32
+    8000744c:	84aa                	mv	s1,a0
     acquire(&s->lock);
-    8000742a:	ffff9097          	auipc	ra,0xffff9
-    8000742e:	7ee080e7          	jalr	2030(ra) # 80000c18 <acquire>
+    8000744e:	ffff9097          	auipc	ra,0xffff9
+    80007452:	7ca080e7          	jalr	1994(ra) # 80000c18 <acquire>
     s->count += 1;
-    80007432:	4c9c                	lw	a5,24(s1)
-    80007434:	2785                	addiw	a5,a5,1
-    80007436:	cc9c                	sw	a5,24(s1)
+    80007456:	4c9c                	lw	a5,24(s1)
+    80007458:	2785                	addiw	a5,a5,1
+    8000745a:	cc9c                	sw	a5,24(s1)
     wakeup(s);
-    80007438:	8526                	mv	a0,s1
-    8000743a:	ffffb097          	auipc	ra,0xffffb
-    8000743e:	e4e080e7          	jalr	-434(ra) # 80002288 <wakeup>
+    8000745c:	8526                	mv	a0,s1
+    8000745e:	ffffb097          	auipc	ra,0xffffb
+    80007462:	e2a080e7          	jalr	-470(ra) # 80002288 <wakeup>
     release(&s->lock);
-    80007442:	8526                	mv	a0,s1
-    80007444:	ffffa097          	auipc	ra,0xffffa
-    80007448:	888080e7          	jalr	-1912(ra) # 80000ccc <release>
-    8000744c:	60e2                	ld	ra,24(sp)
-    8000744e:	6442                	ld	s0,16(sp)
-    80007450:	64a2                	ld	s1,8(sp)
-    80007452:	6105                	addi	sp,sp,32
-    80007454:	8082                	ret
+    80007466:	8526                	mv	a0,s1
+    80007468:	ffffa097          	auipc	ra,0xffffa
+    8000746c:	864080e7          	jalr	-1948(ra) # 80000ccc <release>
+}
+    80007470:	60e2                	ld	ra,24(sp)
+    80007472:	6442                	ld	s0,16(sp)
+    80007474:	64a2                	ld	s1,8(sp)
+    80007476:	6105                	addi	sp,sp,32
+    80007478:	8082                	ret
+
+000000008000747a <semalloc>:
+
+int
+semalloc()
+{
+    8000747a:	1141                	addi	sp,sp,-16
+    8000747c:	e422                	sd	s0,8(sp)
+    8000747e:	0800                	addi	s0,sp,16
+    for(int i = 0; i < NSEM; i++){
+    80007480:	00031797          	auipc	a5,0x31
+    80007484:	bb478793          	addi	a5,a5,-1100 # 80038034 <semtable+0x34>
+    80007488:	4501                	li	a0,0
+        if(semtable.sem[i].valid != 1){
+    8000748a:	4685                	li	a3,1
+    for(int i = 0; i < NSEM; i++){
+    8000748c:	06400613          	li	a2,100
+        if(semtable.sem[i].valid != 1){
+    80007490:	4398                	lw	a4,0(a5)
+    80007492:	00d71863          	bne	a4,a3,800074a2 <semalloc+0x28>
+    for(int i = 0; i < NSEM; i++){
+    80007496:	2505                	addiw	a0,a0,1
+    80007498:	02078793          	addi	a5,a5,32
+    8000749c:	fec51ae3          	bne	a0,a2,80007490 <semalloc+0x16>
+            return i;
+        }
+    }
+
+    return -1;
+    800074a0:	557d                	li	a0,-1
+}
+    800074a2:	6422                	ld	s0,8(sp)
+    800074a4:	0141                	addi	sp,sp,16
+    800074a6:	8082                	ret
+
+00000000800074a8 <semdealloc>:
+
+int 
+semdealloc()
+{
+    800074a8:	1101                	addi	sp,sp,-32
+    800074aa:	ec06                	sd	ra,24(sp)
+    800074ac:	e822                	sd	s0,16(sp)
+    800074ae:	e426                	sd	s1,8(sp)
+    800074b0:	1000                	addi	s0,sp,32
+    for(int i = 0; i < NSEM; i++){
+    800074b2:	00031797          	auipc	a5,0x31
+    800074b6:	b8278793          	addi	a5,a5,-1150 # 80038034 <semtable+0x34>
+    800074ba:	4481                	li	s1,0
+        if(semtable.sem[i].valid == 1){
+    800074bc:	4685                	li	a3,1
+    for(int i = 0; i < NSEM; i++){
+    800074be:	06400613          	li	a2,100
+        if(semtable.sem[i].valid == 1){
+    800074c2:	4398                	lw	a4,0(a5)
+    800074c4:	00d70963          	beq	a4,a3,800074d6 <semdealloc+0x2e>
+    for(int i = 0; i < NSEM; i++){
+    800074c8:	2485                	addiw	s1,s1,1
+    800074ca:	02078793          	addi	a5,a5,32
+    800074ce:	fec49ae3          	bne	s1,a2,800074c2 <semdealloc+0x1a>
+            semdestroy(&semtable.sem[i]);
+            return i;
+        }
+    }
+    return -1;
+    800074d2:	54fd                	li	s1,-1
+    800074d4:	a821                	j	800074ec <semdealloc+0x44>
+            semdestroy(&semtable.sem[i]);
+    800074d6:	00549513          	slli	a0,s1,0x5
+    800074da:	00031797          	auipc	a5,0x31
+    800074de:	b3e78793          	addi	a5,a5,-1218 # 80038018 <semtable+0x18>
+    800074e2:	953e                	add	a0,a0,a5
+    800074e4:	00000097          	auipc	ra,0x0
+    800074e8:	eee080e7          	jalr	-274(ra) # 800073d2 <semdestroy>
+}
+    800074ec:	8526                	mv	a0,s1
+    800074ee:	60e2                	ld	ra,24(sp)
+    800074f0:	6442                	ld	s0,16(sp)
+    800074f2:	64a2                	ld	s1,8(sp)
+    800074f4:	6105                	addi	sp,sp,32
+    800074f6:	8082                	ret
 	...
 
 0000000080008000 <_trampoline>:

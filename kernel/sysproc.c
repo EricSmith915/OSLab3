@@ -127,6 +127,9 @@ sys_freepmem()
 
 uint64
 sys_sem_init(){
+  //uint64 addr;
+
+
   return 1;
 }
 

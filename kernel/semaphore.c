@@ -18,7 +18,10 @@ seminit(void)
 void
 semdestroy(struct semaphore *s)
 {
-    return;
+    acquire(&s->lock);
+    s->count = 0;
+    s->valid = 0;
+    release(&s->lock);
 }
 
 void
@@ -39,4 +42,28 @@ sempost(struct semaphore *s)
     s->count += 1;
     wakeup(s);
     release(&s->lock);
+}
+
+int
+semalloc()
+{
+    for(int i = 0; i < NSEM; i++){
+        if(semtable.sem[i].valid != 1){
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+int 
+semdealloc()
+{
+    for(int i = 0; i < NSEM; i++){
+        if(semtable.sem[i].valid == 1){
+            semdestroy(&semtable.sem[i]);
+            return i;
+        }
+    }
+    return -1;
 }
