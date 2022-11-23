@@ -3,6 +3,7 @@
 #include "memlayout.h"
 #include "riscv.h"
 #include "defs.h"
+//#include "semaphore.c"
 
 volatile static int started = 0;
 
@@ -30,6 +31,7 @@ main()
     virtio_disk_init(); // emulated hard disk
     mmrlistinit();  // init the memory list
     userinit();      // first user process
+    //seminit();
     __sync_synchronize();
     started = 1;
   } else {

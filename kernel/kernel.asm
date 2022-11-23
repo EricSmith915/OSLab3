@@ -6,7 +6,7 @@ Disassembly of section .text:
 
 0000000080000000 <_entry>:
     80000000:	0000a117          	auipc	sp,0xa
-    80000004:	93013103          	ld	sp,-1744(sp) # 80009930 <_GLOBAL_OFFSET_TABLE_+0x8>
+    80000004:	94013103          	ld	sp,-1728(sp) # 80009940 <_GLOBAL_OFFSET_TABLE_+0x8>
     80000008:	6505                	lui	a0,0x1
     8000000a:	f14025f3          	csrr	a1,mhartid
     8000000e:	0585                	addi	a1,a1,1
@@ -111,7 +111,7 @@ w_mscratch(uint64 x)
     80000094:	300027f3          	csrr	a5,mstatus
   x &= ~MSTATUS_MPP_MASK;
     80000098:	7779                	lui	a4,0xffffe
-    8000009a:	7ff70713          	addi	a4,a4,2047 # ffffffffffffe7ff <end+0xffffffff7ffc67ff>
+    8000009a:	7ff70713          	addi	a4,a4,2047 # ffffffffffffe7ff <end+0xffffffff7ffc5b67>
     8000009e:	8ff9                	and	a5,a5,a4
   x |= MSTATUS_MPP_S;
     800000a0:	6705                	lui	a4,0x1
@@ -1331,8 +1331,8 @@ kfree(void *pa)
     800009ee:	03451793          	slli	a5,a0,0x34
     800009f2:	ebb9                	bnez	a5,80000a48 <kfree+0x66>
     800009f4:	84aa                	mv	s1,a0
-    800009f6:	00037797          	auipc	a5,0x37
-    800009fa:	60a78793          	addi	a5,a5,1546 # 80038000 <end>
+    800009f6:	00038797          	auipc	a5,0x38
+    800009fa:	2a278793          	addi	a5,a5,674 # 80038c98 <end>
     800009fe:	04f56563          	bltu	a0,a5,80000a48 <kfree+0x66>
     80000a02:	47c5                	li	a5,17
     80000a04:	07ee                	slli	a5,a5,0x1b
@@ -1433,8 +1433,8 @@ kfree(void *pa)
   freerange(end, (void*)PHYSTOP);
     80000ac4:	45c5                	li	a1,17
     80000ac6:	05ee                	slli	a1,a1,0x1b
-    80000ac8:	00037517          	auipc	a0,0x37
-    80000acc:	53850513          	addi	a0,a0,1336 # 80038000 <end>
+    80000ac8:	00038517          	auipc	a0,0x38
+    80000acc:	1d050513          	addi	a0,a0,464 # 80038c98 <end>
     80000ad0:	00000097          	auipc	ra,0x0
     80000ad4:	f88080e7          	jalr	-120(ra) # 80000a58 <freerange>
 }
@@ -1888,7 +1888,7 @@ memmove(void *dst, const void *src, uint n)
     80000d84:	872a                	mv	a4,a0
       *d++ = *s++;
     80000d86:	0585                	addi	a1,a1,1
-    80000d88:	0705                	addi	a4,a4,1 # fffffffffffff001 <end+0xffffffff7ffc7001>
+    80000d88:	0705                	addi	a4,a4,1 # fffffffffffff001 <end+0xffffffff7ffc6369>
     80000d8a:	fff5c683          	lbu	a3,-1(a1)
     80000d8e:	fed70fa3          	sb	a3,-1(a4)
     while(n-- > 0)
@@ -2100,8 +2100,8 @@ main()
   if(cpuid() == 0){
     80000ec2:	00001097          	auipc	ra,0x1
     80000ec6:	ece080e7          	jalr	-306(ra) # 80001d90 <cpuid>
-    mmrlistinit();  // init the memory list
     userinit();      // first user process
+    //seminit();
     __sync_synchronize();
     started = 1;
   } else {
@@ -2299,7 +2299,7 @@ walk(pagetable_t pagetable, uint64 va, int alloc)
     80001054:	0017e793          	ori	a5,a5,1
     80001058:	00f93023          	sd	a5,0(s2)
   for(int level = 2; level > 0; level--) {
-    8000105c:	3a5d                	addiw	s4,s4,-9 # ffffffffffffeff7 <end+0xffffffff7ffc6ff7>
+    8000105c:	3a5d                	addiw	s4,s4,-9 # ffffffffffffeff7 <end+0xffffffff7ffc635f>
     8000105e:	036a0063          	beq	s4,s6,8000107e <walk+0x82>
     pte_t *pte = &pagetable[PX(level, va)];
     80001062:	0149d933          	srl	s2,s3,s4
@@ -3577,7 +3577,7 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     800018e6:	96da                	add	a3,a3,s6
       if(*p == '\0'){
     800018e8:	00f60733          	add	a4,a2,a5
-    800018ec:	00074703          	lbu	a4,0(a4) # fffffffffffff000 <end+0xffffffff7ffc7000>
+    800018ec:	00074703          	lbu	a4,0(a4) # fffffffffffff000 <end+0xffffffff7ffc6368>
     800018f0:	df51                	beqz	a4,8000188c <copyinstr+0x26>
         *dst = *p;
     800018f2:	00e78023          	sb	a4,0(a5)
@@ -4281,7 +4281,7 @@ forkret(void)
 
   if (first) {
     80001e0c:	00008797          	auipc	a5,0x8
-    80001e10:	ad47a783          	lw	a5,-1324(a5) # 800098e0 <first.1>
+    80001e10:	ae47a783          	lw	a5,-1308(a5) # 800098f0 <first.1>
     80001e14:	eb89                	bnez	a5,80001e26 <forkret+0x32>
     // be run from main().
     first = 0;
@@ -4298,7 +4298,7 @@ forkret(void)
     80001e24:	8082                	ret
     first = 0;
     80001e26:	00008797          	auipc	a5,0x8
-    80001e2a:	aa07ad23          	sw	zero,-1350(a5) # 800098e0 <first.1>
+    80001e2a:	ac07a523          	sw	zero,-1334(a5) # 800098f0 <first.1>
     fsinit(ROOTDEV);
     80001e2e:	4505                	li	a0,1
     80001e30:	00002097          	auipc	ra,0x2
@@ -4321,7 +4321,7 @@ allocpid() {
     80001e54:	dc8080e7          	jalr	-568(ra) # 80000c18 <acquire>
   pid = nextpid;
     80001e58:	00008797          	auipc	a5,0x8
-    80001e5c:	a8c78793          	addi	a5,a5,-1396 # 800098e4 <nextpid>
+    80001e5c:	a9c78793          	addi	a5,a5,-1380 # 800098f4 <nextpid>
     80001e60:	4384                	lw	s1,0(a5)
   nextpid = nextpid + 1;
     80001e62:	0014871b          	addiw	a4,s1,1
@@ -5925,7 +5925,7 @@ dealloc_mmr_listid(int listid) {
   uvminit(p->pagetable, initcode, sizeof(initcode));
     80002af2:	03400613          	li	a2,52
     80002af6:	00007597          	auipc	a1,0x7
-    80002afa:	dfa58593          	addi	a1,a1,-518 # 800098f0 <initcode>
+    80002afa:	e0a58593          	addi	a1,a1,-502 # 80009900 <initcode>
     80002afe:	7928                	ld	a0,112(a0)
     80002b00:	fffff097          	auipc	ra,0xfffff
     80002b04:	89c080e7          	jalr	-1892(ra) # 8000139c <uvminit>
@@ -12403,7 +12403,7 @@ argfd(int n, int *pfd, struct file **pf)
     80005e14:	ffffc097          	auipc	ra,0xffffc
     80005e18:	fa8080e7          	jalr	-88(ra) # 80001dbc <myproc>
     80005e1c:	fdc42703          	lw	a4,-36(s0)
-    80005e20:	01e70793          	addi	a5,a4,30 # fffffffffffff01e <end+0xffffffff7ffc701e>
+    80005e20:	01e70793          	addi	a5,a4,30 # fffffffffffff01e <end+0xffffffff7ffc6386>
     80005e24:	078e                	slli	a5,a5,0x3
     80005e26:	953e                	add	a0,a0,a5
     80005e28:	611c                	ld	a5,0(a0)
@@ -13695,7 +13695,7 @@ sys_exec(void)
     800068b8:	a835                	j	800068f4 <sys_exec+0xfc>
       argv[i] = 0;
     800068ba:	0a8e                	slli	s5,s5,0x3
-    800068bc:	fc0a8793          	addi	a5,s5,-64 # ffffffffffffefc0 <end+0xffffffff7ffc6fc0>
+    800068bc:	fc0a8793          	addi	a5,s5,-64 # ffffffffffffefc0 <end+0xffffffff7ffc6328>
     800068c0:	00878ab3          	add	s5,a5,s0
     800068c4:	e80ab023          	sd	zero,-384(s5)
   int ret = exec(path, argv);
@@ -13938,7 +13938,7 @@ sys_mmap()
     80006a9c:	078e                	slli	a5,a5,0x3
     80006a9e:	97ce                	add	a5,a5,s3
     80006aa0:	4685                	li	a3,1
-    80006aa2:	18d7ae23          	sw	a3,412(a5) # fffffffffffff19c <end+0xffffffff7ffc719c>
+    80006aa2:	18d7ae23          	sw	a3,412(a5) # fffffffffffff19c <end+0xffffffff7ffc6504>
     newmmr->addr = start_addr;
     80006aa6:	1927b423          	sd	s2,392(a5)
     newmmr->length = p->cur_max - start_addr;
@@ -14551,7 +14551,7 @@ free_desc(int i)
     80006f52:	4b98                	lw	a4,16(a5)
   *R(VIRTIO_MMIO_DRIVER_FEATURES) = features;
     80006f54:	c7ffe6b7          	lui	a3,0xc7ffe
-    80006f58:	75f68693          	addi	a3,a3,1887 # ffffffffc7ffe75f <end+0xffffffff47fc675f>
+    80006f58:	75f68693          	addi	a3,a3,1887 # ffffffffc7ffe75f <end+0xffffffff47fc5ac7>
     80006f5c:	8f75                	and	a4,a4,a3
     80006f5e:	d398                	sw	a4,32(a5)
   *R(VIRTIO_MMIO_STATUS) = status;
@@ -14932,7 +14932,7 @@ virtio_disk_rw(struct buf *b, int write)
     80007270:	f8442703          	lw	a4,-124(s0)
     80007274:	628c                	ld	a1,0(a3)
     80007276:	962e                	add	a2,a2,a1
-    80007278:	00e61723          	sh	a4,14(a2) # ffffffffffffe00e <end+0xffffffff7ffc600e>
+    80007278:	00e61723          	sh	a4,14(a2) # ffffffffffffe00e <end+0xffffffff7ffc5376>
   disk.desc[idx[1]].addr = (uint64) b->data;
     8000727c:	0712                	slli	a4,a4,0x4
     8000727e:	6290                	ld	a2,0(a3)
@@ -15058,6 +15058,138 @@ virtio_disk_intr()
     80007366:	55e50513          	addi	a0,a0,1374 # 800098c0 <syscalls+0x3f8>
     8000736a:	ffff9097          	auipc	ra,0xffff9
     8000736e:	1d0080e7          	jalr	464(ra) # 8000053a <panic>
+
+0000000080007372 <seminit>:
+
+struct semtab semtable;
+
+void 
+seminit(void)
+{
+    80007372:	7179                	addi	sp,sp,-48
+    80007374:	f406                	sd	ra,40(sp)
+    80007376:	f022                	sd	s0,32(sp)
+    80007378:	ec26                	sd	s1,24(sp)
+    8000737a:	e84a                	sd	s2,16(sp)
+    8000737c:	e44e                	sd	s3,8(sp)
+    8000737e:	1800                	addi	s0,sp,48
+    initlock(&semtable.lock, "semtable");
+    80007380:	00002597          	auipc	a1,0x2
+    80007384:	55858593          	addi	a1,a1,1368 # 800098d8 <syscalls+0x410>
+    80007388:	00031517          	auipc	a0,0x31
+    8000738c:	c7850513          	addi	a0,a0,-904 # 80038000 <semtable>
+    80007390:	ffff9097          	auipc	ra,0xffff9
+    80007394:	7f8080e7          	jalr	2040(ra) # 80000b88 <initlock>
+    for(int i = 0; i < NSEM; i++){
+    80007398:	00031497          	auipc	s1,0x31
+    8000739c:	c8048493          	addi	s1,s1,-896 # 80038018 <semtable+0x18>
+    800073a0:	00032997          	auipc	s3,0x32
+    800073a4:	8f898993          	addi	s3,s3,-1800 # 80038c98 <end>
+        initlock(&semtable.sem[i].lock, "sem");
+    800073a8:	00002917          	auipc	s2,0x2
+    800073ac:	54090913          	addi	s2,s2,1344 # 800098e8 <syscalls+0x420>
+    800073b0:	85ca                	mv	a1,s2
+    800073b2:	8526                	mv	a0,s1
+    800073b4:	ffff9097          	auipc	ra,0xffff9
+    800073b8:	7d4080e7          	jalr	2004(ra) # 80000b88 <initlock>
+    for(int i = 0; i < NSEM; i++){
+    800073bc:	02048493          	addi	s1,s1,32
+    800073c0:	ff3498e3          	bne	s1,s3,800073b0 <seminit+0x3e>
+    }
+}
+    800073c4:	70a2                	ld	ra,40(sp)
+    800073c6:	7402                	ld	s0,32(sp)
+    800073c8:	64e2                	ld	s1,24(sp)
+    800073ca:	6942                	ld	s2,16(sp)
+    800073cc:	69a2                	ld	s3,8(sp)
+    800073ce:	6145                	addi	sp,sp,48
+    800073d0:	8082                	ret
+
+00000000800073d2 <semdestroy>:
+
+void
+semdestroy(struct semaphore *s)
+{
+    800073d2:	1141                	addi	sp,sp,-16
+    800073d4:	e422                	sd	s0,8(sp)
+    800073d6:	0800                	addi	s0,sp,16
+    return;
+}
+    800073d8:	6422                	ld	s0,8(sp)
+    800073da:	0141                	addi	sp,sp,16
+    800073dc:	8082                	ret
+
+00000000800073de <semwait>:
+
+void
+semwait(struct semaphore *s)
+{
+    800073de:	1101                	addi	sp,sp,-32
+    800073e0:	ec06                	sd	ra,24(sp)
+    800073e2:	e822                	sd	s0,16(sp)
+    800073e4:	e426                	sd	s1,8(sp)
+    800073e6:	1000                	addi	s0,sp,32
+    800073e8:	84aa                	mv	s1,a0
+    acquire(&s->lock);
+    800073ea:	ffffa097          	auipc	ra,0xffffa
+    800073ee:	82e080e7          	jalr	-2002(ra) # 80000c18 <acquire>
+    while(s->count == 0){
+    800073f2:	4c9c                	lw	a5,24(s1)
+    800073f4:	eb89                	bnez	a5,80007406 <semwait+0x28>
+        sleep(s, &s->lock);
+    800073f6:	85a6                	mv	a1,s1
+    800073f8:	8526                	mv	a0,s1
+    800073fa:	ffffb097          	auipc	ra,0xffffb
+    800073fe:	e2a080e7          	jalr	-470(ra) # 80002224 <sleep>
+    while(s->count == 0){
+    80007402:	4c9c                	lw	a5,24(s1)
+    80007404:	dbed                	beqz	a5,800073f6 <semwait+0x18>
+    }
+    s->count -= 1;
+    80007406:	37fd                	addiw	a5,a5,-1
+    80007408:	cc9c                	sw	a5,24(s1)
+    release(&s->lock);
+    8000740a:	8526                	mv	a0,s1
+    8000740c:	ffffa097          	auipc	ra,0xffffa
+    80007410:	8c0080e7          	jalr	-1856(ra) # 80000ccc <release>
+}
+    80007414:	60e2                	ld	ra,24(sp)
+    80007416:	6442                	ld	s0,16(sp)
+    80007418:	64a2                	ld	s1,8(sp)
+    8000741a:	6105                	addi	sp,sp,32
+    8000741c:	8082                	ret
+
+000000008000741e <sempost>:
+
+void 
+sempost(struct semaphore *s)
+{
+    8000741e:	1101                	addi	sp,sp,-32
+    80007420:	ec06                	sd	ra,24(sp)
+    80007422:	e822                	sd	s0,16(sp)
+    80007424:	e426                	sd	s1,8(sp)
+    80007426:	1000                	addi	s0,sp,32
+    80007428:	84aa                	mv	s1,a0
+    acquire(&s->lock);
+    8000742a:	ffff9097          	auipc	ra,0xffff9
+    8000742e:	7ee080e7          	jalr	2030(ra) # 80000c18 <acquire>
+    s->count += 1;
+    80007432:	4c9c                	lw	a5,24(s1)
+    80007434:	2785                	addiw	a5,a5,1
+    80007436:	cc9c                	sw	a5,24(s1)
+    wakeup(s);
+    80007438:	8526                	mv	a0,s1
+    8000743a:	ffffb097          	auipc	ra,0xffffb
+    8000743e:	e4e080e7          	jalr	-434(ra) # 80002288 <wakeup>
+    release(&s->lock);
+    80007442:	8526                	mv	a0,s1
+    80007444:	ffffa097          	auipc	ra,0xffffa
+    80007448:	888080e7          	jalr	-1912(ra) # 80000ccc <release>
+    8000744c:	60e2                	ld	ra,24(sp)
+    8000744e:	6442                	ld	s0,16(sp)
+    80007450:	64a2                	ld	s1,8(sp)
+    80007452:	6105                	addi	sp,sp,32
+    80007454:	8082                	ret
 	...
 
 0000000080008000 <_trampoline>:
