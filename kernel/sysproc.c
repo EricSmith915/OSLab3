@@ -124,3 +124,23 @@ sys_freepmem()
 {
   return kfreepagecount();
 }
+
+uint64
+sys_sem_init(){
+  return 1;
+}
+
+uint64
+sys_sem_destroy(){
+  return 1;
+}
+
+uint64
+sys_sem_wait(){
+  return 1;
+}
+
+uint64
+sys_sem_post(){
+  return 1;
+}
