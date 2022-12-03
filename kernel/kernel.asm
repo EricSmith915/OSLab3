@@ -8105,12 +8105,12 @@ sys_freepmem()
 
 0000000080003c82 <sys_sem_init>:
 
-uint64
+void
 sys_sem_init(){
     80003c82:	1141                	addi	sp,sp,-16
     80003c84:	e422                	sd	s0,8(sp)
     80003c86:	0800                	addi	s0,sp,16
-  return 1;
+  return seminit();
 }
     80003c88:	4505                	li	a0,1
     80003c8a:	6422                	ld	s0,8(sp)
@@ -8124,7 +8124,7 @@ sys_sem_destroy(){
     80003c90:	1141                	addi	sp,sp,-16
     80003c92:	e422                	sd	s0,8(sp)
     80003c94:	0800                	addi	s0,sp,16
-  return 1;
+  return semdestroy();
 }
     80003c96:	4505                	li	a0,1
     80003c98:	6422                	ld	s0,8(sp)
